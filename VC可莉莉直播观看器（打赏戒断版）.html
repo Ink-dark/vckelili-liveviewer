@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B站直播观看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #0f0f0f;
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-image: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #eee, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        
+        .player-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .player-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 450px;
+            border: 1px solid #333;
+        }
+        
+        .player-container iframe {
+            width: 700px;
+            height: 400px;
+            display: block;
+            border: none;
+        }
+        
+        .room-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #252525;
+        }
+        
+        .current-room {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        .room-id {
+            color: #bbb;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            color: #ddd;
+            letter-spacing: 1px;
+        }
+        
+        .room-switcher {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .room-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #eee;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            min-width: 160px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .room-btn:hover {
+            background: #222;
+            border-color: #444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .room-btn.active {
+            background: #333;
+            border-color: #555;
+            font-weight: 400;
+            box-shadow: 0 0 15px rgba(100,100,100,0.2);
+        }
+        
+        .custom-input {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .custom-input input {
+            flex: 1;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 14px 20px;
+            color: #eee;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-input input:focus {
+            outline: none;
+            border-color: #666;
+            box-shadow: 0 0 10px rgba(100,100,100,0.2);
+        }
+        
+        .custom-input button {
+            background: #222;
+            border: 1px solid #333;
+            color: #eee;
+            padding: 14px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            min-width: 160px;
+        }
+        
+        .custom-input button:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            padding-top: 25px;
+            border-top: 1px solid #333;
+            color: #777;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .no-room-selected {
+            text-align: center;
+            color: #777;
+            font-size: 1.3rem;
+            padding: 40px;
+            font-weight: 300;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+        
+        @media (max-width: 900px) {
+            .player-container iframe {
+                width: 100%;
+                max-width: 700px;
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .room-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .room-btn {
+                min-width: 120px;
+                padding: 10px 15px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .player-container iframe {
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .room-switcher {
+                flex-direction: column;
+            }
+            
+            .custom-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">BILIBILI LIVE</div>
+            <h1>直播观看器</h1>
+            <p class="subtitle">简约设计 · 专注直播内容</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="player-section">
+                <div class="player-container" id="playerContainer">
+                    <div class="no-room-selected">请从下方选择一个直播间</div>
+                </div>
+                
+                <div class="room-info">
+                    <div class="current-room">当前直播间: <span id="currentRoomName">未选择</span></div>
+                    <div class="room-id">房间号: <span id="currentRoomId">-</span></div>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="section-title">预设直播间</div>
+                <div class="room-switcher" id="roomButtons">
+                    <!-- 预设直播间按钮将通过JavaScript生成 -->
+                </div>
+                
+                <div class="section-title">自定义直播间</div>
+                <div class="custom-input">
+                    <input type="text" id="roomInput" placeholder="输入B站直播间号 (例如: 9029090)">
+                    <button id="switchBtn">切换直播间</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2026 B站直播观看器 | 简约黑白风格</p>
+        </footer>
+    </div>
+
+    <script>
+        // 预设直播间列表
+        const presetRooms = [
+            { id: '9029090', name: 'VC可莉莉' },
+            { id: '1829743583', name: '墨染柒_Official' },
+            { id: '6', name: '哔哩哔哩直播' },
+            { id: '21452505', name: '主机游戏' },
+            { id: '23058', name: '虚拟主播' },
+            { id: '21449013', name: '音乐电台' }
+        ];
+        
+        // DOM元素
+        const playerContainer = document.getElementById('playerContainer');
+        const currentRoomName = document.getElementById('currentRoomName');
+        const currentRoomId = document.getElementById('currentRoomId');
+        const roomButtons = document.getElementById('roomButtons');
+        const roomInput = document.getElementById('roomInput');
+        const switchBtn = document.getElementById('switchBtn');
+        
+        // 初始化预设直播间按钮
+        function initPresetRooms() {
+            presetRooms.forEach(room => {
+                const btn = document.createElement('button');
+                btn.className = 'room-btn';
+                btn.textContent = room.name;
+                btn.dataset.roomId = room.id;
+                btn.addEventListener('click', () => switchRoom(room.id, room.name));
+                roomButtons.appendChild(btn);
+            });
+        }
+        
+        // 切换直播间
+        function switchRoom(roomId, roomName = '自定义直播间') {
+            // 清空播放器容器
+            playerContainer.innerHTML = '';
+            
+            // 创建新的iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '700px';
+            iframe.style.height = '400px';
+            iframe.src = `https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=${roomId}&quality=0`;
+            iframe.setAttribute('frameborder', 'no');
+            iframe.setAttribute('framespacing', '0');
+            iframe.setAttribute('scrolling', 'no');
+            iframe.setAttribute('allow', 'autoplay; encrypted-media');
+            iframe.setAttribute('allowfullscreen', 'true');
+            
+            // 添加到容器
+            playerContainer.appendChild(iframe);
+            
+            // 更新房间信息
+            currentRoomName.textContent = roomName;
+            currentRoomId.textContent = roomId;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.room-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.roomId === roomId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // 初始化
+        function init() {
+            initPresetRooms();
+            
+            // 默认加载第一个直播间
+            if (presetRooms.length > 0) {
+                switchRoom(presetRooms[0].id, presetRooms[0].name);
+            }
+            
+            // 切换按钮事件
+            switchBtn.addEventListener('click', () => {
+                const roomId = roomInput.value.trim();
+                if (roomId) {
+                    switchRoom(roomId, '自定义直播间');
+                    roomInput.value = '';
+                }
+            });
+            
+            // 输入框回车事件
+            roomInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    switchBtn.click();
+                }
+            });
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
